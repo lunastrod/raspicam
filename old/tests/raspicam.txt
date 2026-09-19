@@ -1,0 +1,14 @@
+protocolos:
+rtsp onvif
+
+decode video stream
+capture frame or picture
+if changes
+    generate alert (take video, send telegram)
+
+detect changes:
+    greyscale, gaussian blur para simplificar
+    absdiff para 
+
+fichero de token:
+    key.secret
