@@ -1,3 +1,4 @@
+import glob
 import json
 import os
 import time
@@ -39,12 +40,23 @@ class Cam:
         )
 
         print("Conectando con la cámara...")
+        project_dir = os.path.dirname(os.path.abspath(__file__))
+        venv_dir = os.path.join(project_dir, "venv")
+        wsdl_matches = glob.glob(
+            os.path.join( venv_dir, "lib", "python*", "site-packages", "wsdl" )
+        )
+
+        if not wsdl_matches:
+            raise RuntimeError( f"No se encontró el directorio WSDL en {venv_dir}" )
+        
+        wsdl_dir = wsdl_matches[0]
 
         self.cam = ONVIFCamera(
             self.ip,
             self.port,
             self.user,
-            self.password
+            self.password,
+            wsdl_dir=wsdl_dir
         )
 
         print("Cámara conectada")

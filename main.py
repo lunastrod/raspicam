@@ -6,7 +6,7 @@ import CameraBot
 
 def main():
 
-    cam = Cam.Cam("Camara2")
+    cam = Cam.Cam("Camara1")
 
     bot = CameraBot.CameraBot("Bot1")
     bot.start_thread()
