@@ -254,8 +254,10 @@ class Cam:
                             self.STREAM_DIR,
                             "segment_%Y-%m-%d_%H-%M-%S.ts"
                         ),
-                        vcodec="libx264",
-                        preset="ultrafast",
+                        #vcodec="libx264",
+                        #preset="ultrafast",
+                        vcodec="copy",
+                        acodec="copy",
                         f="segment",
                         strftime=1,
                         segment_time=self.LEN_SEGMENT
