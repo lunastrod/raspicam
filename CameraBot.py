@@ -123,7 +123,9 @@ class CameraBot(TBot):
             "/ping - Comprobar que el bot responde\n"
             "/inicio - Añadir este chat a las alertas\n"
             "/ayuda - Mostrar esta ayuda\n"
-            "/borrar_canales - Borrar todos los canales"
+            "/borrar_canales - Borrar todos los canales\n"
+            "/video - Solicitar un video\n"
+            "/foto - Solicitar una foto"
         )
 
         await update.message.reply_text(
@@ -189,6 +191,76 @@ class CameraBot(TBot):
             "Todos los canales de alertas han sido borrados."
         )
 
+    async def crear_solicitud(
+        self,
+        update: Update,
+        nombre_fichero,
+        tipo
+    ):
+
+        user_id = update.effective_user.id
+
+        if not self.es_admin(user_id):
+
+            await update.message.reply_text(
+                "No tienes permisos para ejecutar este comando."
+            )
+
+            return
+
+        os.makedirs(
+            self.STREAM_DIR,
+            exist_ok=True
+        )
+
+        ruta_solicitud = os.path.join(
+            self.STREAM_DIR,
+            nombre_fichero
+        )
+
+        try:
+
+            with open(
+                ruta_solicitud,
+                "x"
+            ):
+
+                pass
+
+            await update.message.reply_text(
+                f"Solicitud de {tipo} creada."
+            )
+
+        except FileExistsError:
+
+            await update.message.reply_text(
+                f"Ya hay una solicitud de {tipo} pendiente."
+            )
+
+    async def video(
+        self,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE
+    ):
+
+        await self.crear_solicitud(
+            update,
+            "video.request",
+            "video"
+        )
+
+    async def foto(
+        self,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE
+    ):
+
+        await self.crear_solicitud(
+            update,
+            "photo.request",
+            "foto"
+        )
+
     # ---------------------------------------------------------
     # HANDLERS
     # ---------------------------------------------------------
@@ -220,6 +292,20 @@ class CameraBot(TBot):
             CommandHandler(
                 "borrar_canales",
                 self.borrar_canales
+            )
+        )
+
+        self.bot.add_handler(
+            CommandHandler(
+                "video",
+                self.video
+            )
+        )
+
+        self.bot.add_handler(
+            CommandHandler(
+                "foto",
+                self.foto
             )
         )
 
