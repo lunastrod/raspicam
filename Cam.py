@@ -147,6 +147,8 @@ class Cam:
 
             print("Foto guardada:", filename)
 
+            return True
+
         except ffmpeg.Error as e:
 
             print("Error sacando foto")
@@ -158,6 +160,8 @@ class Cam:
                         errors="ignore"
                     )
                 )
+
+            return False
 
     def convertir_segmento(
         self,
@@ -623,6 +627,76 @@ class Cam:
                         e
                     )
 
+    def procesar_solicitudes(self):
+
+        foto_request = os.path.join(
+            self.STREAM_DIR,
+            "photo.request"
+        )
+
+        if os.path.exists(foto_request):
+
+            try:
+
+                utc_time = datetime.now().astimezone().isoformat()
+
+                if self.sacar_foto(utc_time, "manual"):
+
+                    os.remove(foto_request)
+
+                    print("Solicitud de foto procesada")
+
+            except Exception as e:
+
+                print("Error procesando solicitud de foto:", e)
+
+        video_request = os.path.join(
+            self.STREAM_DIR,
+            "video.request"
+        )
+
+        if os.path.exists(video_request):
+
+            try:
+
+                segmentos = [
+                    os.path.join(self.STREAM_DIR, filename)
+                    for filename in os.listdir(self.STREAM_DIR)
+                    if (
+                        filename.startswith("segment_")
+                        and filename.endswith(".ts")
+                    )
+                ]
+
+                segmentos.sort(key=os.path.getmtime)
+
+                # El mÃ¡s reciente todavÃ­a puede estar escribiÃ©ndose.
+                if len(segmentos) < 2:
+
+                    print(
+                        "No hay un segmento completado "
+                        "para la solicitud de video"
+                    )
+
+                    return
+
+                segmento = segmentos[-2]
+                utc_time = datetime.now().astimezone().isoformat()
+
+                if self.convertir_segmento(
+                    segmento,
+                    utc_time,
+                    "manual"
+                ):
+
+                    os.remove(video_request)
+
+                    print("Solicitud de video procesada")
+
+            except Exception as e:
+
+                print("Error procesando solicitud de video:", e)
+
     def vigilar(self):
 
         print("Iniciando vigilancia...")
@@ -701,6 +775,8 @@ class Cam:
                         utc_time,
                         tipo_evento
                     )
+
+                self.procesar_solicitudes()
 
                 # Aprovechamos el hilo de vigilancia
                 # para mantener el buffer circular.
